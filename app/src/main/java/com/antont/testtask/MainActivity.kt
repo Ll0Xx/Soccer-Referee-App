@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -43,22 +44,16 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     val navController = rememberNavController()
     val items = listOf(
-        Screen.Calendar,
-        Screen.Results,
-        Screen.Add,
-        Screen.Statistic,
-        Screen.Settings
+        Screen.Calendar, Screen.Results, Screen.Add, Screen.Statistic, Screen.Settings
     )
-    
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         bottomBar = {
             CustomNavigationBar(
-                items = items,
-                currentRoute = currentRoute,
-                onItemSelected = { screen ->
+                items = items, currentRoute = currentRoute, onItemSelected = { screen ->
                     navController.navigate(screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
@@ -66,10 +61,8 @@ fun MainScreen() {
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
-            )
-        }
-    ) { innerPadding ->
+                })
+        }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Screen.Calendar.route,
@@ -86,14 +79,10 @@ fun MainScreen() {
 
 @Composable
 fun CustomNavigationBar(
-    items: List<Screen>,
-    currentRoute: String?,
-    onItemSelected: (Screen) -> Unit
+    items: List<Screen>, currentRoute: String?, onItemSelected: (Screen) -> Unit
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         shadowElevation = 8.dp
@@ -101,7 +90,7 @@ fun CustomNavigationBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -115,28 +104,41 @@ fun CustomNavigationBar(
                             if (isSelected) MaterialTheme.colorScheme.primaryContainer
                             else Color.Transparent
                         )
-                        .clickable { onItemSelected(screen) },
-                    contentAlignment = Alignment.Center
+                        .clickable { onItemSelected(screen) }, contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = screen.icon,
-                        contentDescription = null,
-                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    screen.resourceIcon?.let {
+                        Icon(
+                            painter = painterResource(id = it),
+                            contentDescription = null,
+                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } ?: screen.icon?.let {
+                        Icon(
+                            imageVector = it,
+                            contentDescription = null,
+                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-sealed class Screen(val route: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    object Calendar : Screen("calendar", Icons.Default.DateRange)
-    object Results : Screen("results", Icons.Default.List)
-    object Add : Screen("add", Icons.Default.Add)
-    object Statistic : Screen("statistic", Icons.Default.Warning)
-    object Settings : Screen("settings", Icons.Default.Settings)
+sealed class Screen(
+    val route: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    val resourceIcon: Int? = null
+) {
+    object Calendar : Screen("calendar", resourceIcon = R.drawable.ic_calendar)
+    object Results : Screen("results", resourceIcon = R.drawable.ic_archive)
+    object Add : Screen("add", resourceIcon = R.drawable.ic_add_24)
+    object Statistic : Screen("statistic", resourceIcon = R.drawable.ic_archive)
+    object Settings : Screen("settings", resourceIcon = R.drawable.ic_settings)
 }
 
 @Composable
