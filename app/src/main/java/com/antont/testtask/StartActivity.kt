@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 import com.antont.testtask.ui.theme.TestTaskTheme
 
 class StartActivity : ComponentActivity() {
@@ -42,15 +43,15 @@ fun StartScreen(modifier: Modifier = Modifier) {
             contentScale = ContentScale.Crop
         )
         
-        // Start button at bottom center
-        Button(
-            onClick = { /* Add your action here */ },
+        // Start button at bottom center using ImageButton
+        Image(
+            painter = painterResource(id = R.drawable.start_button_background),
+            contentDescription = "Start",
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
-        ) {
-            Text(text = "Start")
-        }
+                .clickable { /* Add your action here */ }
+        )
     }
 }
 
