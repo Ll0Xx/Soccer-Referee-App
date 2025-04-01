@@ -5,15 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,6 +30,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.antont.testtask.ui.theme.TestTaskTheme
+
+// Define custom colors
+val MainBackgroundColor = Color(0xFF002B5A)
+val BottomBarColor = Color(0xFF1D60AA)
+val BottomBarItemColor = Color(0xFF002956)
+val SelectedIconColor = Color(0xFFFFE111)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +59,7 @@ fun MainScreen() {
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
+        containerColor = MainBackgroundColor,
         bottomBar = {
             CustomNavigationBar(
                 items = items, currentRoute = currentRoute, onItemSelected = { screen ->
@@ -83,14 +92,14 @@ fun CustomNavigationBar(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
+        color = BottomBarColor,
         tonalElevation = 8.dp,
         shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(bottom = 24.dp, top = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -100,26 +109,24 @@ fun CustomNavigationBar(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .background(
-                            if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                            else Color.Transparent
-                        )
-                        .clickable { onItemSelected(screen) }, contentAlignment = Alignment.Center
+                        .background(BottomBarItemColor)
+                        .clickable { onItemSelected(screen) }, 
+                    contentAlignment = Alignment.Center
                 ) {
                     screen.resourceIcon?.let {
                         Icon(
                             painter = painterResource(id = it),
                             contentDescription = null,
-                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isSelected) SelectedIconColor
+                                  else Color.White,
                             modifier = Modifier.size(24.dp)
                         )
                     } ?: screen.icon?.let {
                         Icon(
                             imageVector = it,
                             contentDescription = null,
-                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isSelected) SelectedIconColor
+                                  else Color.White,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -137,7 +144,7 @@ sealed class Screen(
     object Calendar : Screen("calendar", resourceIcon = R.drawable.ic_calendar)
     object Results : Screen("results", resourceIcon = R.drawable.ic_archive)
     object Add : Screen("add", resourceIcon = R.drawable.ic_add_24)
-    object Statistic : Screen("statistic", resourceIcon = R.drawable.ic_archive)
+    object Statistic : Screen("statistic", resourceIcon = R.drawable.ic_statistic)
     object Settings : Screen("settings", resourceIcon = R.drawable.ic_settings)
 }
 
