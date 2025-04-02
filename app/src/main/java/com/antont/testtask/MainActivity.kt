@@ -179,67 +179,18 @@ sealed class Screen(
 
 @Composable
 fun CalendarScreen() {
-    // Sample data for the list
-    val calendarItems = List(30) { index -> "Calendar Item ${index + 1}" }
-    
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Calendar",
+            text = "Calendar Screen",
             color = Color.White,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 16.dp)
+            fontSize = 24.sp
         )
-        
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(calendarItems) { item ->
-                CalendarItem(text = item)
-            }
-            // Add some extra space at the bottom for the navigation bar
-            item {
-                Spacer(modifier = Modifier.height(80.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun CalendarItem(text: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { /* Handle click */ },
-        colors = CardDefaults.cardColors(containerColor = CardColor),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = 16.sp,
-                modifier = Modifier.weight(1f)
-            )
-            
-            Icon(
-                painter = painterResource(id = R.drawable.ic_calendar),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-        }
     }
 }
 
