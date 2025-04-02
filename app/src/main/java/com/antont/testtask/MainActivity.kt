@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -439,96 +441,108 @@ fun AddScreen() {
                 fontSize = 14.sp,
                 modifier = Modifier.padding(start = 16.dp)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // First Team Dropdown
-                ExposedDropdownMenuBox(
-                    expanded = expandedTeam1,
-                    onExpandedChange = { expandedTeam1 = it },
-                    modifier = Modifier.weight(1f)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = selectedTeam1,
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam1) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White
-                        )
-                    )
-                    ExposedDropdownMenu(
+                    // First Team Dropdown
+                    ExposedDropdownMenuBox(
                         expanded = expandedTeam1,
-                        onDismissRequest = { expandedTeam1 = false }
+                        onExpandedChange = { expandedTeam1 = it },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        teams.forEach { team ->
-                            DropdownMenuItem(
-                                text = { Text(team, color = Color.Black) },
-                                onClick = {
-                                    selectedTeam1 = team
-                                    expandedTeam1 = false
-                                }
+                        OutlinedTextField(
+                            value = selectedTeam1,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam1) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = Color.White,
+                                unfocusedBorderColor = Color.White,
+                                focusedLabelColor = Color.White,
+                                unfocusedLabelColor = Color.White
                             )
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedTeam1,
+                            onDismissRequest = { expandedTeam1 = false }
+                        ) {
+                            teams.forEach { team ->
+                                DropdownMenuItem(
+                                    text = { Text(team, color = Color.Black) },
+                                    onClick = {
+                                        selectedTeam1 = team
+                                        expandedTeam1 = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Second Team Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = expandedTeam2,
+                        onExpandedChange = { expandedTeam2 = it },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = selectedTeam2,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam2) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = Color.White,
+                                unfocusedBorderColor = Color.White,
+                                focusedLabelColor = Color.White,
+                                unfocusedLabelColor = Color.White
+                            )
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedTeam2,
+                            onDismissRequest = { expandedTeam2 = false }
+                        ) {
+                            teams.forEach { team ->
+                                DropdownMenuItem(
+                                    text = { Text(team, color = Color.Black) },
+                                    onClick = {
+                                        selectedTeam2 = team
+                                        expandedTeam2 = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
 
-                // VS Icon
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_teams_vs),
-                    contentDescription = null,
-                    tint = Color.White,
+                // VS Icon overlapping the dropdowns
+                Box(
                     modifier = Modifier
                         .size(24.dp)
-                        .align(Alignment.CenterVertically)
-                )
-
-                // Second Team Dropdown
-                ExposedDropdownMenuBox(
-                    expanded = expandedTeam2,
-                    onExpandedChange = { expandedTeam2 = it },
-                    modifier = Modifier.weight(1f)
+                        .align(Alignment.CenterEnd)
+                        .offset(x = (-48).dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF002853)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    OutlinedTextField(
-                        value = selectedTeam2,
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam2) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White
-                        )
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_teams_vs),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
                     )
-                    ExposedDropdownMenu(
-                        expanded = expandedTeam2,
-                        onDismissRequest = { expandedTeam2 = false }
-                    ) {
-                        teams.forEach { team ->
-                            DropdownMenuItem(
-                                text = { Text(team, color = Color.Black) },
-                                onClick = {
-                                    selectedTeam2 = team
-                                    expandedTeam2 = false
-                                }
-                            )
-                        }
-                    }
                 }
             }
         }
