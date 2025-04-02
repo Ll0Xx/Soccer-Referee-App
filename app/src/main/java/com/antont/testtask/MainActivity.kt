@@ -16,18 +16,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -51,6 +57,7 @@ val BottomBarColor = Color(0xFF1D60AA)
 val BottomBarItemColor = Color(0xFF002956)
 val SelectedIconColor = Color(0xFFFFE111)
 val CardColor = Color(0xFF18447E)
+val TitleDecoratorColor = Color(0xFFFA4D01)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,21 +87,14 @@ fun MainScreen() {
                 .fillMaxSize()
                 .background(MainBackgroundColor)
         ) {
-            // Test text that will be visible under the blurred navigation bar
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) { }
-
             // Navigation content
             Column(modifier = Modifier.fillMaxSize()) {
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Calendar.route,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 8.dp)
                 ) {
                     composable(Screen.Calendar.route) { CalendarScreen() }
                     composable(Screen.Results.route) { ResultsScreen() }
@@ -104,13 +104,11 @@ fun MainScreen() {
                 }
             }
 
-            // Blurred background for navigation bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(90.dp)
                     .align(Alignment.BottomCenter)
-                    .blur(20.dp)
                     .background(BottomBarColor)
             )
 
@@ -290,20 +288,318 @@ fun ResultsScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen() {
+    var selectedCountry by remember { mutableStateOf("") }
+    var selectedLeague by remember { mutableStateOf("") }
+    var selectedTeam1 by remember { mutableStateOf("") }
+    var selectedTeam2 by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf("") }
+    var expandedCountry by remember { mutableStateOf(false) }
+    var expandedLeague by remember { mutableStateOf(false) }
+    var expandedTeam1 by remember { mutableStateOf(false) }
+    var expandedTeam2 by remember { mutableStateOf(false) }
+    var expandedDate by remember { mutableStateOf(false) }
+
+    val countries = listOf("England", "Spain", "Germany", "France", "Italy")
+    val leagues = listOf("Premier League", "La Liga", "Bundesliga", "Ligue 1", "Serie A")
+    val teams = listOf("Team 1", "Team 2", "Team 3", "Team 4", "Team 5")
+    val dates = listOf("Today", "Tomorrow", "Next Week", "Next Month")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text(
-            text = "Add Screen",
-            color = Color.White,
-            fontSize = 24.sp
-        )
+        // Title with icon
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_title_decorator),
+                contentDescription = null,
+                tint = TitleDecoratorColor,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = "Add New Matches",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+
+        // Country Dropdown
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = "Country",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            ExposedDropdownMenuBox(
+                expanded = expandedCountry,
+                onExpandedChange = { expandedCountry = it }
+            ) {
+                OutlinedTextField(
+                    value = selectedCountry,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCountry) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedCountry,
+                    onDismissRequest = { expandedCountry = false }
+                ) {
+                    countries.forEach { country ->
+                        DropdownMenuItem(
+                            text = { Text(country, color = Color.Black) },
+                            onClick = {
+                                selectedCountry = country
+                                expandedCountry = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Leagues Dropdown
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = "Leagues",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            ExposedDropdownMenuBox(
+                expanded = expandedLeague,
+                onExpandedChange = { expandedLeague = it }
+            ) {
+                OutlinedTextField(
+                    value = selectedLeague,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLeague) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedLeague,
+                    onDismissRequest = { expandedLeague = false }
+                ) {
+                    leagues.forEach { league ->
+                        DropdownMenuItem(
+                            text = { Text(league, color = Color.Black) },
+                            onClick = {
+                                selectedLeague = league
+                                expandedLeague = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Teams Dropdowns
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = "Teams",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // First Team Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expandedTeam1,
+                    onExpandedChange = { expandedTeam1 = it },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    OutlinedTextField(
+                        value = selectedTeam1,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam1) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.White,
+                            focusedLabelColor = Color.White,
+                            unfocusedLabelColor = Color.White
+                        )
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedTeam1,
+                        onDismissRequest = { expandedTeam1 = false }
+                    ) {
+                        teams.forEach { team ->
+                            DropdownMenuItem(
+                                text = { Text(team, color = Color.Black) },
+                                onClick = {
+                                    selectedTeam1 = team
+                                    expandedTeam1 = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // VS Icon
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_teams_vs),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.CenterVertically)
+                )
+
+                // Second Team Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expandedTeam2,
+                    onExpandedChange = { expandedTeam2 = it },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    OutlinedTextField(
+                        value = selectedTeam2,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam2) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.White,
+                            focusedLabelColor = Color.White,
+                            unfocusedLabelColor = Color.White
+                        )
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedTeam2,
+                        onDismissRequest = { expandedTeam2 = false }
+                    ) {
+                        teams.forEach { team ->
+                            DropdownMenuItem(
+                                text = { Text(team, color = Color.Black) },
+                                onClick = {
+                                    selectedTeam2 = team
+                                    expandedTeam2 = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Date Dropdown
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = "Date",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            ExposedDropdownMenuBox(
+                expanded = expandedDate,
+                onExpandedChange = { expandedDate = it }
+            ) {
+                OutlinedTextField(
+                    value = selectedDate,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDate) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedDate,
+                    onDismissRequest = { expandedDate = false }
+                ) {
+                    dates.forEach { date ->
+                        DropdownMenuItem(
+                            text = { Text(date, color = Color.Black) },
+                            onClick = {
+                                selectedDate = date
+                                expandedDate = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Save Button
+        Button(
+            onClick = { /* Handle save action */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFFFE111)
+            )
+        ) {
+            Text(
+                text = "Save",
+                color = Color(0xFF002956),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
