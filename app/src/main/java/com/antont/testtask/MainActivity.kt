@@ -17,8 +17,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -38,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -52,6 +61,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.antont.testtask.ui.theme.TestTaskTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 // Define custom colors
 val MainBackgroundColor = Color(0xFF002B5A)
@@ -297,6 +309,117 @@ fun ResultsScreen() {
     }
 }
 
+@Composable
+fun MyReadOnlyTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {},
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text(
+                    text = label,
+                    color = Color.White
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color.White
+            )
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0f)
+                .clickable(
+                    onClick = onClick,
+                ),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun BottomSheetSelectionDemo(
+    items: List<String>,
+    selectedValue: String,
+    onValueSelected: (String) -> Unit,
+    label: String
+) {
+    val coroutineScope: CoroutineScope = rememberCoroutineScope()
+    val modalBottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+    )
+
+    val toggleModalBottomSheetState = {
+        coroutineScope.launch {
+            if (modalBottomSheetState.currentValue == modalBottomSheetState.targetValue) {
+                if (modalBottomSheetState.isVisible) {
+                    modalBottomSheetState.hide()
+                } else {
+                    modalBottomSheetState.show()
+                }
+            }
+        }
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = modalBottomSheetState,
+        sheetContent = {
+            LazyColumn {
+                items(items) { item ->
+                    Text(
+                        text = item,
+                        color = Color.White,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                onValueSelected(item)
+                                toggleModalBottomSheetState()
+                            }
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 12.dp,
+                            ),
+                    )
+                }
+            }
+        },
+        sheetBackgroundColor = CardColor
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.wrapContentSize(),
+        ) {
+            MyReadOnlyTextField(
+                value = selectedValue,
+                label = label,
+                onClick = {
+                    toggleModalBottomSheetState()
+                },
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = 4.dp,
+                    ),
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen() {
@@ -305,24 +428,11 @@ fun AddScreen() {
     var selectedTeam1 by remember { mutableStateOf("") }
     var selectedTeam2 by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
-    var expandedCountry by remember { mutableStateOf(false) }
-    var expandedLeague by remember { mutableStateOf(false) }
-    var expandedTeam1 by remember { mutableStateOf(false) }
-    var expandedTeam2 by remember { mutableStateOf(false) }
-    var expandedDate by remember { mutableStateOf(false) }
 
     val countries = listOf("England", "Spain", "Germany", "France", "Italy")
     val leagues = listOf("Premier League", "La Liga", "Bundesliga", "Ligue 1", "Serie A")
     val teams = listOf("Team 1", "Team 2", "Team 3", "Team 4", "Team 5")
     val dates = listOf("Today", "Tomorrow", "Next Week", "Next Month")
-
-    val dropdownBackground = Modifier
-        .clip(RoundedCornerShape(DropdownCornerRadius))
-        .background(
-            Brush.verticalGradient(
-                colors = DropdownGradientColors
-            )
-        )
 
     Column(
         modifier = Modifier
@@ -350,109 +460,25 @@ fun AddScreen() {
             )
         }
 
-        // Country Dropdown
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = "Country",
-                color = Color.White,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-            ExposedDropdownMenuBox(
-                expanded = expandedCountry,
-                onExpandedChange = { expandedCountry = it }
-            ) {
-                OutlinedTextField(
-                    value = selectedCountry,
-                    onValueChange = {},
-                    readOnly = true,
-                    placeholder = { Text("Select country") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCountry) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                        .then(dropdownBackground),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedCountry,
-                    onDismissRequest = { expandedCountry = false }
-                ) {
-                    countries.forEach { country ->
-                        DropdownMenuItem(
-                            text = { Text(country, color = Color.Black) },
-                            onClick = {
-                                selectedCountry = country
-                                expandedCountry = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
+        // Country Selection
+        BottomSheetSelectionDemo(
+            items = countries,
+            selectedValue = selectedCountry,
+            onValueSelected = { selectedCountry = it },
+            label = "Select country"
+        )
 
-        // Leagues Dropdown
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = "Leagues",
-                color = Color.White,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-            ExposedDropdownMenuBox(
-                expanded = expandedLeague,
-                onExpandedChange = { expandedLeague = it }
-            ) {
-                OutlinedTextField(
-                    value = selectedLeague,
-                    onValueChange = {},
-                    readOnly = true,
-                    placeholder = { Text("Select league") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLeague) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                        .then(dropdownBackground),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedLeague,
-                    onDismissRequest = { expandedLeague = false }
-                ) {
-                    leagues.forEach { league ->
-                        DropdownMenuItem(
-                            text = { Text(league, color = Color.Black) },
-                            onClick = {
-                                selectedLeague = league
-                                expandedLeague = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
+        // League Selection
+        BottomSheetSelectionDemo(
+            items = leagues,
+            selectedValue = selectedLeague,
+            onValueSelected = { selectedLeague = it },
+            label = "Select league"
+        )
 
-        // Teams Dropdowns
+        // Teams Selection
         Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "Teams",
@@ -460,6 +486,7 @@ fun AddScreen() {
                 fontSize = 14.sp,
                 modifier = Modifier.padding(start = 16.dp)
             )
+            
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -467,87 +494,21 @@ fun AddScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // First Team Dropdown
-                    ExposedDropdownMenuBox(
-                        expanded = expandedTeam1,
-                        onExpandedChange = { expandedTeam1 = it },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        OutlinedTextField(
-                            value = selectedTeam1,
-                            onValueChange = {},
-                            readOnly = true,
-                            placeholder = { Text("Select first team") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam1) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor()
-                                .then(dropdownBackground),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color.Transparent,
-                                unfocusedBorderColor = Color.Transparent,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.White
-                            )
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expandedTeam1,
-                            onDismissRequest = { expandedTeam1 = false }
-                        ) {
-                            teams.forEach { team ->
-                                DropdownMenuItem(
-                                    text = { Text(team, color = Color.Black) },
-                                    onClick = {
-                                        selectedTeam1 = team
-                                        expandedTeam1 = false
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    // First Team
+                    BottomSheetSelectionDemo(
+                        items = teams,
+                        selectedValue = selectedTeam1,
+                        onValueSelected = { selectedTeam1 = it },
+                        label = "Select first team"
+                    )
 
-                    // Second Team Dropdown
-                    ExposedDropdownMenuBox(
-                        expanded = expandedTeam2,
-                        onExpandedChange = { expandedTeam2 = it },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        OutlinedTextField(
-                            value = selectedTeam2,
-                            onValueChange = {},
-                            readOnly = true,
-                            placeholder = { Text("Select second team") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam2) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor()
-                                .then(dropdownBackground),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color.Transparent,
-                                unfocusedBorderColor = Color.Transparent,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.White
-                            )
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expandedTeam2,
-                            onDismissRequest = { expandedTeam2 = false }
-                        ) {
-                            teams.forEach { team ->
-                                DropdownMenuItem(
-                                    text = { Text(team, color = Color.Black) },
-                                    onClick = {
-                                        selectedTeam2 = team
-                                        expandedTeam2 = false
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    // Second Team
+                    BottomSheetSelectionDemo(
+                        items = teams,
+                        selectedValue = selectedTeam2,
+                        onValueSelected = { selectedTeam2 = it },
+                        label = "Select second team"
+                    )
                 }
 
                 // VS Icon overlapping the dropdowns
@@ -570,55 +531,13 @@ fun AddScreen() {
             }
         }
 
-        // Date Dropdown
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = "Date",
-                color = Color.White,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-            ExposedDropdownMenuBox(
-                expanded = expandedDate,
-                onExpandedChange = { expandedDate = it }
-            ) {
-                OutlinedTextField(
-                    value = selectedDate,
-                    onValueChange = {},
-                    readOnly = true,
-                    placeholder = { Text("Select date") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDate) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                        .then(dropdownBackground),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedDate,
-                    onDismissRequest = { expandedDate = false }
-                ) {
-                    dates.forEach { date ->
-                        DropdownMenuItem(
-                            text = { Text(date, color = Color.Black) },
-                            onClick = {
-                                selectedDate = date
-                                expandedDate = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
+        // Date Selection
+        BottomSheetSelectionDemo(
+            items = dates,
+            selectedValue = selectedDate,
+            onValueSelected = { selectedDate = it },
+            label = "Select date"
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
