@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -124,11 +125,11 @@ fun MainScreen() {
                 ) {
                     items.forEach { screen ->
                         val isSelected = currentRoute == screen.route
+                        val isAddButton = screen == Screen.Add
                         Box(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(CircleShape)
-                                .background(BottomBarItemColor)
                                 .clickable { 
                                     navController.navigate(screen.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
@@ -140,6 +141,26 @@ fun MainScreen() {
                                 }, 
                             contentAlignment = Alignment.Center
                         ) {
+                            if (isAddButton) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color(0xFFFE8D3B),
+                                                    Color(0xFFF01515)
+                                                )
+                                            )
+                                        )
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(BottomBarItemColor)
+                                )
+                            }
                             screen.resourceIcon?.let {
                                 Icon(
                                     painter = painterResource(id = it),
