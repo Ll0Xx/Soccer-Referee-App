@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -100,7 +103,7 @@ fun MainScreen() {
                     composable(Screen.Settings.route) { SettingsScreen() }
                 }
             }
-            
+
             // Blurred background for navigation bar
             Box(
                 modifier = Modifier
@@ -110,7 +113,7 @@ fun MainScreen() {
                     .blur(20.dp)
                     .background(BottomBarColor)
             )
-            
+
             // Clear buttons on top of the blur
             Box(
                 modifier = Modifier
@@ -126,57 +129,112 @@ fun MainScreen() {
                     items.forEach { screen ->
                         val isSelected = currentRoute == screen.route
                         val isAddButton = screen == Screen.Add
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .clip(CircleShape)
-                                .clickable { 
-                                    navController.navigate(screen.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
+                        val isCalendar = screen == Screen.Calendar
+
+                        if (isCalendar) {
+                            BadgedBox(
+                                badge = {
+                                    Badge(
+                                        containerColor = Color(0xFFFFE111),
+                                        contentColor = Color(0xFF002956),
+                                        modifier = Modifier.offset(x = (-4).dp, y = 4.dp)
+                                    ) {
+                                        Text("2")
                                     }
-                                }, 
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isAddButton) {
+                                }
+                            ) {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            Brush.verticalGradient(
-                                                colors = listOf(
-                                                    Color(0xFFFE8D3B),
-                                                    Color(0xFFF01515)
+                                        .size(56.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            navController.navigate(screen.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(BottomBarItemColor)
+                                    )
+                                    screen.resourceIcon?.let {
+                                        Icon(
+                                            painter = painterResource(id = it),
+                                            contentDescription = null,
+                                            tint = if (isSelected) SelectedIconColor
+                                                else Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    } ?: screen.icon?.let {
+                                        Icon(
+                                            imageVector = it,
+                                            contentDescription = null,
+                                            tint = if (isSelected) SelectedIconColor
+                                                else Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        navController.navigate(screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isAddButton) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    colors = listOf(
+                                                        Color(0xFFFE8D3B),
+                                                        Color(0xFFF01515)
+                                                    )
                                                 )
                                             )
-                                        )
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(BottomBarItemColor)
-                                )
-                            }
-                            screen.resourceIcon?.let {
-                                Icon(
-                                    painter = painterResource(id = it),
-                                    contentDescription = null,
-                                    tint = if (isSelected) SelectedIconColor
-                                        else Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            } ?: screen.icon?.let {
-                                Icon(
-                                    imageVector = it,
-                                    contentDescription = null,
-                                    tint = if (isSelected) SelectedIconColor
-                                        else Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(BottomBarItemColor)
+                                    )
+                                }
+                                screen.resourceIcon?.let {
+                                    Icon(
+                                        painter = painterResource(id = it),
+                                        contentDescription = null,
+                                        tint = if (isSelected) SelectedIconColor
+                                            else Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                } ?: screen.icon?.let {
+                                    Icon(
+                                        imageVector = it,
+                                        contentDescription = null,
+                                        tint = if (isSelected) SelectedIconColor
+                                            else Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             }
                         }
                     }
