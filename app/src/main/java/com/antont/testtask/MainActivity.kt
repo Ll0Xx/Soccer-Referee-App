@@ -61,6 +61,13 @@ val SelectedIconColor = Color(0xFFFFE111)
 val CardColor = Color(0xFF18447E)
 val TitleDecoratorColor = Color(0xFFFA4D01)
 
+// Define common values
+val DropdownCornerRadius = 12.dp
+val DropdownGradientColors = listOf(
+    Color(0xFF003B7C),
+    Color(0xFF043872)
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -309,6 +316,14 @@ fun AddScreen() {
     val teams = listOf("Team 1", "Team 2", "Team 3", "Team 4", "Team 5")
     val dates = listOf("Today", "Tomorrow", "Next Week", "Next Month")
 
+    val dropdownBackground = Modifier
+        .clip(RoundedCornerShape(DropdownCornerRadius))
+        .background(
+            Brush.verticalGradient(
+                colors = DropdownGradientColors
+            )
+        )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -353,15 +368,17 @@ fun AddScreen() {
                     value = selectedCountry,
                     onValueChange = {},
                     readOnly = true,
+                    placeholder = { Text("Select country") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCountry) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor()
+                        .then(dropdownBackground),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
                         focusedLabelColor = Color.White,
                         unfocusedLabelColor = Color.White
                     )
@@ -401,15 +418,17 @@ fun AddScreen() {
                     value = selectedLeague,
                     onValueChange = {},
                     readOnly = true,
+                    placeholder = { Text("Select league") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLeague) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor()
+                        .then(dropdownBackground),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
                         focusedLabelColor = Color.White,
                         unfocusedLabelColor = Color.White
                     )
@@ -458,15 +477,17 @@ fun AddScreen() {
                             value = selectedTeam1,
                             onValueChange = {},
                             readOnly = true,
+                            placeholder = { Text("Select first team") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam1) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(),
+                                .menuAnchor()
+                                .then(dropdownBackground),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.White,
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
                                 focusedLabelColor = Color.White,
                                 unfocusedLabelColor = Color.White
                             )
@@ -497,15 +518,17 @@ fun AddScreen() {
                             value = selectedTeam2,
                             onValueChange = {},
                             readOnly = true,
+                            placeholder = { Text("Select second team") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTeam2) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(),
+                                .menuAnchor()
+                                .then(dropdownBackground),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.White,
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
                                 focusedLabelColor = Color.White,
                                 unfocusedLabelColor = Color.White
                             )
@@ -565,15 +588,17 @@ fun AddScreen() {
                     value = selectedDate,
                     onValueChange = {},
                     readOnly = true,
+                    placeholder = { Text("Select date") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDate) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor()
+                        .then(dropdownBackground),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
                         focusedLabelColor = Color.White,
                         unfocusedLabelColor = Color.White
                     )
