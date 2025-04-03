@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -57,6 +58,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import com.antont.testtask.data.repository.TeamsRepository
 import com.antont.testtask.ui.theme.TestTaskTheme
 import com.antont.testtask.viewmodel.TeamsViewModel
@@ -697,12 +700,13 @@ fun InputSelectionBottomSheet(
                 }
 
                 // Options list
-                Column(
+                LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .height(200.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    filteredOptions.forEach { option ->
+                    items(filteredOptions) { option ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
