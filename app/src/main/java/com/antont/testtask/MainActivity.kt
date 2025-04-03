@@ -213,8 +213,7 @@ fun MainScreen() {
                                             .background(
                                                 Brush.verticalGradient(
                                                     colors = listOf(
-                                                        Color(0xFFFE8D3B),
-                                                        Color(0xFFF01515)
+                                                        Color(0xFFFE8D3B), Color(0xFFF01515)
                                                     )
                                                 )
                                             )
@@ -348,6 +347,7 @@ fun AddScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
             InputSelectionBottomSheet(
+                "Select country from the list",
                 selectedValue = selectedCountry,
                 options = countries,
                 onOptionSelected = { selectedCountry = it }
@@ -365,6 +365,7 @@ fun AddScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
             InputSelectionBottomSheet(
+                "Select league from the list",
                 selectedValue = selectedLeague,
                 options = leagues,
                 onOptionSelected = { selectedLeague = it }
@@ -390,6 +391,7 @@ fun AddScreen() {
                 ) {
                     // First Team Selection
                     InputSelectionBottomSheet(
+                        "Select first team from the list",
                         selectedValue = selectedTeam1,
                         options = teams,
                         onOptionSelected = { selectedTeam1 = it }
@@ -397,6 +399,7 @@ fun AddScreen() {
 
                     // Second Team Selection
                     InputSelectionBottomSheet(
+                        "Select second team from the list",
                         selectedValue = selectedTeam2,
                         options = teams,
                         onOptionSelected = { selectedTeam2 = it }
@@ -434,6 +437,7 @@ fun AddScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
             InputSelectionBottomSheet(
+                "Select country from the list",
                 selectedValue = selectedDate,
                 options = dates,
                 onOptionSelected = { selectedDate = it }
@@ -465,6 +469,7 @@ fun AddScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputSelectionBottomSheet(
+    title: String,
     selectedValue: String,
     options: List<String>,
     onOptionSelected: (String) -> Unit
@@ -480,16 +485,13 @@ fun InputSelectionBottomSheet(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(),
-                    onClick = { showBottomSheet = true }
-                )
+                    onClick = { showBottomSheet = true })
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF003B7C),
-                            Color(0xFF043872)
+                            Color(0xFF003B7C), Color(0xFF043872)
                         )
-                    ),
-                    shape = RoundedCornerShape(DropdownCornerRadius)
+                    ), shape = RoundedCornerShape(DropdownCornerRadius)
                 )
                 .padding(horizontal = 8.dp, vertical = 16.dp)
         ) {
@@ -519,7 +521,7 @@ fun InputSelectionBottomSheet(
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState,
-            containerColor = Color(0xFF002B5A),
+            containerColor = Color(0xFF013A78),
             dragHandle = null,
             shape = RoundedCornerShape(0.dp)
         ) {
@@ -535,7 +537,7 @@ fun InputSelectionBottomSheet(
                         .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = "Select Option",
+                        text = title,
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -588,7 +590,10 @@ fun InputSelectionBottomSheet(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(
+                    modifier = Modifier
+                        .height(24.dp)
+                )
             }
         }
     }
