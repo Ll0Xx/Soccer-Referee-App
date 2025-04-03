@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -468,6 +469,36 @@ fun AddScreen() {
     }
 }
 
+@Composable
+private fun CustomCheckbox(
+    selected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(20.dp)
+            .background(
+                color = Color.Transparent,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .border(
+                width = 2.dp,
+                color = if (selected) Color(0xFFFFFFFF) else Color(0xFF699AD0),
+                shape = RoundedCornerShape(4.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_check),
+                contentDescription = "Selected",
+                tint = Color(0xFFF54524),
+                modifier = Modifier.size(9.dp)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputSelectionBottomSheet(
@@ -626,16 +657,14 @@ fun InputSelectionBottomSheet(
                 // Options list
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     filteredOptions.forEach { option ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF18447E))
+                                .background(if (option == selectedValue) Color(0xFF002B5A) else Color.Transparent)
                                 .clickable {
                                     onOptionSelected(option)
                                     scope.launch {
@@ -643,13 +672,23 @@ fun InputSelectionBottomSheet(
                                         showBottomSheet = false
                                     }
                                 }
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            Text(
-                                text = option,
-                                color = Color.White,
-                                fontSize = 16.sp,
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CustomCheckbox(
+                                    selected = option == selectedValue
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = option,
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                            }
                         }
                     }
                 }
