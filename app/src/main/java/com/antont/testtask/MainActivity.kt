@@ -60,6 +60,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.SheetValue
 import com.antont.testtask.data.repository.TeamsRepository
 import com.antont.testtask.ui.theme.TestTaskTheme
 import com.antont.testtask.viewmodel.TeamsViewModel
@@ -542,7 +543,10 @@ fun InputSelectionBottomSheet(
     enabled: Boolean = true
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
     var showBottomSheet by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var tempSelectedValue by remember { mutableStateOf(selectedValue) }
@@ -670,7 +674,7 @@ fun InputSelectionBottomSheet(
                             onValueChange = { searchQuery = it },
                             textStyle = androidx.compose.ui.text.TextStyle(
                                 color = Color.White,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
                             ),
                             decorationBox = { innerTextField ->
                                 Box(
@@ -687,7 +691,9 @@ fun InputSelectionBottomSheet(
                                     innerTextField()
                                 }
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
@@ -703,7 +709,7 @@ fun InputSelectionBottomSheet(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp),
+                        .height(250.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(filteredOptions) { option ->
