@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.ripple
@@ -104,7 +106,7 @@ fun MainScreen() {
                     startDestination = Screen.Calendar.route,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = 8.dp)
+                        .padding(top = 16.dp)
                 ) {
                     composable(Screen.Calendar.route) { CalendarScreen() }
                     composable(Screen.Results.route) { ResultsScreen() }
@@ -347,7 +349,7 @@ fun AddScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
             InputSelectionBottomSheet(
-                "Select country from the list",
+                "Select a country from the list",
                 selectedValue = selectedCountry,
                 options = countries,
                 onOptionSelected = { selectedCountry = it }
@@ -365,7 +367,7 @@ fun AddScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
             InputSelectionBottomSheet(
-                "Select league from the list",
+                "Select a league from the list",
                 selectedValue = selectedLeague,
                 options = leagues,
                 onOptionSelected = { selectedLeague = it }
@@ -477,6 +479,14 @@ fun InputSelectionBottomSheet(
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredOptions = remember(searchQuery, options) {
+        if (searchQuery.isEmpty()) {
+            options
+        } else {
+            options.filter { it.contains(searchQuery, ignoreCase = true) }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(
@@ -503,7 +513,9 @@ fun InputSelectionBottomSheet(
             ) {
                 Text(
                     text = selectedValue,
-                    color = Color.White
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 16.dp)
                 )
             }
 
@@ -540,7 +552,7 @@ fun InputSelectionBottomSheet(
                         text = title,
                         color = Color.White,
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         modifier = Modifier.align(Alignment.CenterStart)
                     )
                     
@@ -560,6 +572,57 @@ fun InputSelectionBottomSheet(
                     )
                 }
 
+                // Search Box
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = Color(0xFF002B5A),
+                                shape = RoundedCornerShape(32.dp)
+                            )
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            textStyle = androidx.compose.ui.text.TextStyle(
+                                color = Color.White,
+                                fontSize = 16.sp
+                            ),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            text = "Type it in manually, for example \"${options.first()}\"",
+                                            color = Color(0xFFFFFFFF),
+                                            fontSize = 12.sp,
+                                            modifier = Modifier.padding(start = 16.dp)
+
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search",
+                            tint = Color(0xFFDFE3EA),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
                 // Options list
                 Column(
                     modifier = Modifier
@@ -567,7 +630,7 @@ fun InputSelectionBottomSheet(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    options.forEach { option ->
+                    filteredOptions.forEach { option ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -585,7 +648,7 @@ fun InputSelectionBottomSheet(
                             Text(
                                 text = option,
                                 color = Color.White,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
                             )
                         }
                     }
