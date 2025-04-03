@@ -36,6 +36,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -57,6 +60,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.antont.testtask.ui.theme.TestTaskTheme
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.antont.testtask.data.repository.TeamsRepository
+import com.antont.testtask.viewmodel.TeamsViewModel
 
 // Define custom colors
 val MainBackgroundColor = Color(0xFF002B5A)
@@ -303,16 +309,44 @@ fun ResultsScreen() {
 
 @Composable
 fun AddScreen() {
+    val context = LocalContext.current
+    val repository = remember { TeamsRepository(context) }
+    val viewModel: TeamsViewModel = viewModel(
+        factory = TeamsViewModel.Factory(repository)
+    )
+
     var selectedCountry by remember { mutableStateOf("Select country") }
     var selectedLeague by remember { mutableStateOf("Select league") }
     var selectedTeam1 by remember { mutableStateOf("Select first team") }
     var selectedTeam2 by remember { mutableStateOf("Select second team") }
     var selectedDate by remember { mutableStateOf("Select date") }
 
-    val countries = listOf("England", "Spain", "Germany", "France", "Italy")
-    val leagues = listOf("Premier League", "La Liga", "Bundesliga", "Ligue 1", "Serie A")
-    val teams = listOf("Team 1", "Team 2", "Team 3", "Team 4", "Team 5")
+    val countries by viewModel.countries.collectAsState()
+    val leagues by viewModel.leagues.collectAsState()
+    val teams by viewModel.teams.collectAsState()
     val dates = listOf("Today", "Tomorrow", "Next Week", "Next Month")
+
+    // Load countries when screen is first displayed
+    LaunchedEffect(Unit) {
+        viewModel.loadCountries()
+    }
+
+    // Load leagues when country is selected
+    LaunchedEffect(selectedCountry) {
+        if (selectedCountry != "Select country") {
+            viewModel.loadLeaguesByCountry(selectedCountry)
+            selectedLeague = "Select league" // Reset league when country changes
+            selectedTeam1 = "Select first team" // Reset teams when country changes
+            selectedTeam2 = "Select second team"
+        }
+    }
+
+    // Load teams when league is selected
+    LaunchedEffect(selectedLeague) {
+        if (selectedLeague != "Select league") {
+            viewModel.loadTeamsByLeague(selectedLeague)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -372,7 +406,8 @@ fun AddScreen() {
                 "Select a league from the list",
                 selectedValue = selectedLeague,
                 options = leagues,
-                onOptionSelected = { selectedLeague = it }
+                onOptionSelected = { selectedLeague = it },
+                enabled = selectedCountry != "Select country"
             )
         }
 
@@ -398,15 +433,17 @@ fun AddScreen() {
                         "Select first team from the list",
                         selectedValue = selectedTeam1,
                         options = teams,
-                        onOptionSelected = { selectedTeam1 = it }
+                        onOptionSelected = { selectedTeam1 = it },
+                        enabled = selectedLeague != "Select league"
                     )
 
                     // Second Team Selection
                     InputSelectionBottomSheet(
                         "Select second team from the list",
                         selectedValue = selectedTeam2,
-                        options = teams,
-                        onOptionSelected = { selectedTeam2 = it }
+                        options = teams.filter { it != selectedTeam1 },
+                        onOptionSelected = { selectedTeam2 = it },
+                        enabled = selectedLeague != "Select league"
                     )
                 }
 
@@ -441,7 +478,7 @@ fun AddScreen() {
                 modifier = Modifier.padding(start = 16.dp)
             )
             InputSelectionBottomSheet(
-                "Select country from the list",
+                "Select date from the list",
                 selectedValue = selectedDate,
                 options = dates,
                 onOptionSelected = { selectedDate = it }
@@ -451,22 +488,16 @@ fun AddScreen() {
         Spacer(modifier = Modifier.weight(1f))
 
         // Save Button
-        Button(
-            onClick = { /* Handle save action */ },
+        Image(
+            painter = painterResource(id = R.drawable.save_button_background),
+            contentDescription = "Start",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFFE111)
-            )
-        ) {
-            Text(
-                text = "Save",
-                color = Color(0xFF002956),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+                .padding(bottom = 90.dp)
+                .clickable(onClick = {
+                    // TODO: Implement save functionality
+                })
+        )
     }
 }
 
@@ -506,7 +537,8 @@ fun InputSelectionBottomSheet(
     title: String,
     selectedValue: String,
     options: List<String>,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
+    enabled: Boolean = true
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -527,18 +559,25 @@ fun InputSelectionBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(
+                    enabled = enabled,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(),
-                    onClick = { 
+                    onClick = {
                         tempSelectedValue = selectedValue
-                        showBottomSheet = true 
+                        showBottomSheet = true
                     })
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF003B7C), Color(0xFF043872)
-                        )
-                    ), shape = RoundedCornerShape(DropdownCornerRadius)
+                        colors = if (enabled) {
+                            DropdownGradientColors
+                        } else {
+                            listOf(
+                                Color(0xFF003B7C).copy(alpha = 0.5f),
+                                Color(0xFF043872).copy(alpha = 0.5f)
+                            )
+                        }
+                    ),
+                    shape = RoundedCornerShape(DropdownCornerRadius)
                 )
                 .padding(horizontal = 8.dp, vertical = 16.dp)
         ) {
@@ -550,7 +589,7 @@ fun InputSelectionBottomSheet(
             ) {
                 Text(
                     text = selectedValue,
-                    color = Color.White,
+                    color = if (enabled) Color.White else Color.White.copy(alpha = 0.5f),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = 16.dp)
                 )
@@ -560,7 +599,7 @@ fun InputSelectionBottomSheet(
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Select",
-                tint = Color.White,
+                tint = if (enabled) Color.White else Color.White.copy(alpha = 0.5f),
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
         }
@@ -638,11 +677,10 @@ fun InputSelectionBottomSheet(
                                 ) {
                                     if (searchQuery.isEmpty()) {
                                         Text(
-                                            text = "Type it in manually, for example \"${options.first()}\"",
+                                            text = "Type it in manually, for example \"${if (options.isNotEmpty()) options.first() else ""}\"",
                                             color = Color(0xFFFFFFFF),
                                             fontSize = 12.sp,
                                             modifier = Modifier.padding(start = 16.dp)
-
                                         )
                                     }
                                     innerTextField()
