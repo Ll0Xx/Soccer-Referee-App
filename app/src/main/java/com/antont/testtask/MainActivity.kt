@@ -28,8 +28,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.ripple
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -53,16 +51,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.antont.testtask.ui.theme.TestTaskTheme
-import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.antont.testtask.data.repository.TeamsRepository
+import com.antont.testtask.ui.theme.TestTaskTheme
 import com.antont.testtask.viewmodel.TeamsViewModel
+import kotlinx.coroutines.launch
 
 // Define custom colors
 val MainBackgroundColor = Color(0xFF002B5A)
