@@ -29,10 +29,16 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.ripple
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,6 +71,10 @@ import com.antont.testtask.data.repository.TeamsRepository
 import com.antont.testtask.ui.theme.TestTaskTheme
 import com.antont.testtask.viewmodel.TeamsViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 // Define custom colors
 val MainBackgroundColor = Color(0xFF002B5A)
@@ -326,7 +336,6 @@ fun AddScreen() {
     val countries by viewModel.countries.collectAsState()
     val leagues by viewModel.leagues.collectAsState()
     val teams by viewModel.teams.collectAsState()
-    val dates = listOf("Today", "Tomorrow", "Next Week", "Next Month")
 
     // Load countries when screen is first displayed
     LaunchedEffect(Unit) {
@@ -479,11 +488,9 @@ fun AddScreen() {
                 fontSize = 14.sp,
                 modifier = Modifier.padding(start = 16.dp)
             )
-            InputSelectionBottomSheet(
-                "Select date from the list",
-                selectedValue = selectedDate,
-                options = dates,
-                onOptionSelected = { selectedDate = it }
+            DatePickerBottomSheet(
+                selectedDate = selectedDate,
+                onDateSelected = { selectedDate = it }
             )
         }
 
@@ -760,6 +767,165 @@ fun InputSelectionBottomSheet(
                                     showBottomSheet = false
                                 }
                             })
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerBottomSheet(
+    selectedDate: String,
+    onDateSelected: (String) -> Unit,
+    enabled: Boolean = true
+) {
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialDisplayMode = DisplayMode.Picker,
+        initialSelectedDateMillis = if (selectedDate == "Select date") {
+            System.currentTimeMillis()
+        } else {
+            try {
+                SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).parse(selectedDate)?.time
+                    ?: System.currentTimeMillis()
+            } catch (e: Exception) {
+                System.currentTimeMillis()
+            }
+        }
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    enabled = enabled,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                    onClick = { showBottomSheet = true }
+                )
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = if (enabled) {
+                            DropdownGradientColors
+                        } else {
+                            listOf(
+                                Color(0xFF003B7C).copy(alpha = 0.5f),
+                                Color(0xFF043872).copy(alpha = 0.5f)
+                            )
+                        }
+                    ),
+                    shape = RoundedCornerShape(DropdownCornerRadius)
+                )
+                .padding(horizontal = 8.dp, vertical = 16.dp)
+        ) {
+            Text(
+                text = selectedDate,
+                color = if (enabled) Color.White else Color.White.copy(alpha = 0.5f),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Select date",
+                tint = if (enabled) Color.White else Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = Color(0xFF013A78),
+            dragHandle = null,
+            shape = RoundedCornerShape(0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF002B5A))
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Select date",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_close),
+                        contentDescription = "Close",
+                        tint = Color(0xFF699AD0),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .size(24.dp)
+                            .clickable {
+                                scope.launch {
+                                    sheetState.hide()
+                                    showBottomSheet = false
+                                }
+                            }
+                    )
+                }
+
+                DatePicker(
+                    state = datePickerState,
+                    colors = DatePickerDefaults.colors(
+                        containerColor = Color(0xFF013A78),
+                        titleContentColor = Color.White,
+                        headlineContentColor = Color.White,
+                        weekdayContentColor = Color.White,
+                        subheadContentColor = Color.White,
+                        yearContentColor = Color.White,
+                        currentYearContentColor = Color.White,
+                        selectedYearContentColor = Color.White,
+                        selectedYearContainerColor = Color(0xFFFFE111),
+                        dayContentColor = Color.White,
+                        selectedDayContentColor = Color.Black,
+                        selectedDayContainerColor = Color(0xFFFFE111),
+                        todayContentColor = Color(0xFFFFE111),
+                        todayDateBorderColor = Color(0xFFFFE111)
+                    ),
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.apply_button_background),
+                        contentDescription = "Apply",
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .clickable {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val date = Date(millis)
+                                    val formatter = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                                    val formattedDate = formatter.format(date)
+                                    onDateSelected("$formattedDate D")
+                                }
+                                scope.launch {
+                                    sheetState.hide()
+                                    showBottomSheet = false
+                                }
+                            }
                     )
                 }
             }
