@@ -491,13 +491,13 @@ fun InputSelectionBottomSheet(
                     ),
                     shape = RoundedCornerShape(DropdownCornerRadius)
                 )
-                .padding(horizontal = 8.dp, vertical = 16.dp) // Reduced horizontal padding from 16.dp to 8.dp
+                .padding(horizontal = 8.dp, vertical = 16.dp)
         ) {
             // Label and selected value
             Column(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(end = 24.dp) // Reduced from 40.dp to 24.dp to give more space for text
+                    .padding(end = 24.dp)
             ) {
                 Text(
                     text = selectedValue,
@@ -518,25 +518,77 @@ fun InputSelectionBottomSheet(
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = Color(0xFF002B5A),
+            dragHandle = null,
+            shape = RoundedCornerShape(0.dp)
         ) {
-            Column(Modifier.fillMaxWidth()) {
-                options.forEach { option ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                // Title bar with close button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF002B5A))
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                ) {
                     Text(
-                        text = option,
+                        text = "Select Option",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                    
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_close),
+                        contentDescription = "Close",
+                        tint = Color(0xFF699AD0),
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .align(Alignment.CenterEnd)
+                            .size(24.dp)
                             .clickable {
-                                onOptionSelected(option)
                                 scope.launch {
                                     sheetState.hide()
                                     showBottomSheet = false
                                 }
                             }
-                            .padding(horizontal = 8.dp, vertical = 16.dp) // Reduced horizontal padding from 16.dp to 8.dp
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+
+                // Options list
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    options.forEach { option ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF18447E))
+                                .clickable {
+                                    onOptionSelected(option)
+                                    scope.launch {
+                                        sheetState.hide()
+                                        showBottomSheet = false
+                                    }
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = option,
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
