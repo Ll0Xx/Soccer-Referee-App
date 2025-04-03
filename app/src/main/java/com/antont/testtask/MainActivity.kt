@@ -3,6 +3,7 @@ package com.antont.testtask
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -511,6 +512,8 @@ fun InputSelectionBottomSheet(
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var tempSelectedValue by remember { mutableStateOf(selectedValue) }
+    
     val filteredOptions = remember(searchQuery, options) {
         if (searchQuery.isEmpty()) {
             options
@@ -526,7 +529,10 @@ fun InputSelectionBottomSheet(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(),
-                    onClick = { showBottomSheet = true })
+                    onClick = { 
+                        tempSelectedValue = selectedValue
+                        showBottomSheet = true 
+                    })
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
@@ -664,13 +670,9 @@ fun InputSelectionBottomSheet(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(if (option == selectedValue) Color(0xFF002B5A) else Color.Transparent)
+                                .background(if (option == tempSelectedValue) Color(0xFF002B5A) else Color.Transparent)
                                 .clickable {
-                                    onOptionSelected(option)
-                                    scope.launch {
-                                        sheetState.hide()
-                                        showBottomSheet = false
-                                    }
+                                    tempSelectedValue = option
                                 }
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
@@ -680,7 +682,7 @@ fun InputSelectionBottomSheet(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 CustomCheckbox(
-                                    selected = option == selectedValue
+                                    selected = option == tempSelectedValue
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
@@ -692,10 +694,28 @@ fun InputSelectionBottomSheet(
                         }
                     }
                 }
-                Spacer(
+
+                // Apply Button
+                Box(
                     modifier = Modifier
-                        .height(24.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.apply_button_background),
+                        contentDescription = "Start",
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .clickable(onClick = {
+                                onOptionSelected(tempSelectedValue)
+                                scope.launch {
+                                    sheetState.hide()
+                                    showBottomSheet = false
+                                }
+                            })
+                    )
+                }
             }
         }
     }
